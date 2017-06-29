@@ -598,7 +598,7 @@ Style/EndBlock:
   StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#no-END-blocks'
   Enabled: false
 
-Style/EndOfLine:
+Layout/EndOfLine:
   Description: 'Use Unix-style line endings.'
   StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#crlf'
   Enabled: false
