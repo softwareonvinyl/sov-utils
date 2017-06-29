@@ -1,0 +1,16 @@
+#!/usr/bin/env rvm 2.2.3 do ruby
+
+require "bundler/setup"
+require "sov/foray"
+require "sov/utils/io"
+require "sov/utils/constants"
+require "sov/utils/db"
+
+
+foray = Sov::Foray.new(
+  # These comments are included to illustrate the options necessary for development
+  # skip_dir_check: true,
+  # custom_dump_dir: '/Users/jwolfe/RubyProjects/shop-ware/.dump_files',
+  # custom_project_dir: '/Users/jwolfe/RubyProjects/shop-ware'
+)
+foray.start!
