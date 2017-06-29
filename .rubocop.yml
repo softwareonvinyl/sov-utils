@@ -686,7 +686,7 @@ Layout/IndentArray:
                  literal.
   Enabled: false
 
-Style/IndentHash:
+Layout/IndentHash:
   Description: 'Checks the indentation of the first key in a hash literal.'
   Enabled: false
 
