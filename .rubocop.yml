@@ -1079,7 +1079,7 @@ Layout/TrailingBlankLines:
   StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#newline-eof'
   Enabled: false
 
-Layout/TrailingCommaInArguments:
+Style/TrailingCommaInArguments:
   Description: 'Checks for trailing comma in parameter lists.'
   StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#no-trailing-params-comma'
   Enabled: false
