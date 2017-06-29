@@ -1089,7 +1089,7 @@ Style/TrailingCommaInLiteral:
   StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#no-trailing-array-commas'
   Enabled: false
 
-Style/TrailingWhitespace:
+Layout/TrailingWhitespace:
   Description: 'Avoid trailing whitespace.'
   StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#no-trailing-whitespace'
   Enabled: false
