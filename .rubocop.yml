@@ -743,7 +743,7 @@ Style/MultilineBlockChain:
   StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#single-line-blocks'
   Enabled: false
 
-Style/MultilineBlockLayout:
+Layout/MultilineBlockLayout:
   Description: 'Ensures newlines after multiline block do statements.'
   Enabled: false
 
