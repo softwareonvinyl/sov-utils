@@ -7,11 +7,18 @@ module Sov
       end
 
       module INSTANCE_METHODS
+        def new_branch?
+          @new_branch = @new_branch.nil? ? ask_yes_no('Is this a new branch?') : @new_branch
+        end
+
+        def hotfix?
+          @hotfix = @hotfix.nil? ? ask_yes_no('Is this a hotfix branch?') : @hotfix
+        end
 
         def obtain_branch_information
-          @new_branch = ask_yes_no('Is this a new branch?')
+          new_branch?
 
-          @hotfix = ask_yes_no('Is this a hotfix branch?')
+          hotfix?
 
           if @hotfix
             ensure_rel_current

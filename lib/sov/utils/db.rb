@@ -16,8 +16,6 @@ module Sov
 
           ensure_newest_util_version
 
-          ensure_correct_directory
-
           ensure_dump_dir
           ensure_ignored_dump_files
           ensure_dump_files_count
@@ -26,48 +24,50 @@ module Sov
         def setup_dump_file
           @dump_avail = has_dump_present?
 
-          if @dump_avail
-            @diff_latest_dump = ask_yes_no('Would you like to use the latest dump?')
+          @option_specified = !@new_dump.nil?
+
+          if @option_specified && @new_dump == false && !@dump_avail
+            error_out_with_message('There is not an existing dump to use.')
           end
 
-          if @diff_latest_dump
+          if @dump_avail
+            @new_dump = if @new_dump.nil?
+                          ask_yes_no('Would you like to use a previously downloaded dump?')
+                        else
+                          @new_dump
+                        end
+          else
+            @new_dump = true
+          end
+
+          if !@new_dump
             @dump_file_name = latest_dump
           else
-            if @dump_avail
-              @download_fresh = ask_yes_no('Would you like to download a fresh dump?')
+            # download a new dump
+            @capture_fresh = if @capture_fresh.nil?
+                               ask_yes_no(
+                                 'Would you like to capture a fresh backup before '\
+                                 'downloading the dump file?'
+                               )
+                             else
+                               @capture_fresh
+                             end
+
+            if @app_name.nil?
+              error_out_with_message('You must specify an app on which to deploy.')
             end
 
-            if @download_fresh || !@dump_avail
-              @capture_fresh = ask_yes_no(
-                'Would you like to capture a fresh backup before downloading the dump file?'
-              )
-
-              print('From where would you like to obtain your new dump?')
-              print('1) DEV (default)')
-              print('2) DEMO')
-              print('3) PROD')
-              selection = read_input
-
-              puts "check this out #{selection}"
-              case selection
-                when '2'
-                  download_dump_file(:demo, @capture_fresh)
-                when '3'
-                  download_dump_file(:prod, @capture_fresh)
-                else
-                  download_dump_file(:dev, @capture_fresh)
-              end
-            end
-
-            @dump_file_name = latest_dump
+            download_dump_file
           end
+
+          @dump_file_name = latest_dump
         end
 
         def ensure_processes_killed
           processes = run('ps wax | grep foreman:').split(/\n/).reject { |s| s.include?('grep') }
           return false unless processes.length > 0
 
-          print('Foreman can not be running. About to kill it.')
+          print_update('Foreman can not be running. About to kill it.')
           pid = processes.first.split(' ').first
 
           run("kill -9 #{pid}")
@@ -79,18 +79,22 @@ module Sov
           run('bundle exec rake db:create')
 
           dump_file_path = "#{@dump_dir}/#{@dump_file_name}"
-          run("pg_restore -c --no-owner --no-privileges -d shopware_dev #{dump_file_path}")
+          run("pg_restore -c --no-owner --no-privileges -d #{@db_name} #{dump_file_path}")
 
           run('bundle exec rake db:migrate')
 
           run('bundle exec rake db:sanitize')
+
+          if run('bundle exec rake -T').include?('db:after_setup')
+            run('bundle exec rake db:sov_utils:after_setup')
+          end
         end
 
         # Ensure Methods
 
         def ensure_pg_version
           if pg_supported_version?
-            print('You are currently using the correct Postgres version.')
+            print_update('You are currently using the correct Postgres version.')
           else
             message = "Your current version of Postgresql is unsupported. " +
               "#{PSQL_VERSION} is the supported version."
@@ -100,7 +104,7 @@ module Sov
 
         def ensure_pg_running
           if pg_running?
-            print('Postgres is currently running.')
+            print_update('Postgres is currently running.')
           else
             message = 'Postgres is not currently running. Please start it.'
             error_out_with_message(message)
@@ -109,7 +113,7 @@ module Sov
 
         def ensure_bundler_version
           if bundler_supported_version?
-            print('You are currently using the correct Bundler version.')
+            print_update('You are currently using the correct Bundler version.')
           else
             message = "Your current version of Bundler is unsupported. " +
               "#{BUNDLER_VERSION} is the supported version."
@@ -119,20 +123,9 @@ module Sov
 
         def ensure_newest_util_version
           if newest_util_version?
-            print('You are currently using the correct Sov::Utils version.')
+            print_update('You are currently using the correct Sov::Utils version.')
           else
             message = "Please upgrade Sov::Utils to the newest version: #{@newest_utils_version}"
-            error_out_with_message(message)
-          end
-        end
-
-        def ensure_correct_directory
-          if @skip_dir_check
-            print('You have elected to skip the directory check.')
-          elsif shopware_dir?
-            print('You are currently in the correct directory.')
-          else
-            message = 'Please navigate to the shop-ware project.'
             error_out_with_message(message)
           end
         end
@@ -143,7 +136,7 @@ module Sov
 
         def ensure_ignored_dump_files
           if ignoring_dump_dir?
-            print('Your git ignore settings are correct.')
+            print_update('Your git ignore settings are correct.')
           else
             message = "Your git ignore settings are not correct. " +
               "Please add #{Sov::Utils::DUMP_DIR} to the git ignore file."
@@ -191,23 +184,14 @@ module Sov
           run("ls #{@dump_dir}").split(/\n/).first
         end
 
-        def download_dump_file(location_sym, fresh)
-          puts location_sym
-          if location_sym == :demo
-            app_name = 'shopware-demo'
-          elsif location_sym == :prod
-            app_name = 'shopware'
-          elsif location_sym == :dev
-            app_name = 'shopware-dev'
-          end
-
-          run("heroku pg:backups:capture --app #{app_name}") if fresh
+        def download_dump_file
+          run("heroku pg:backups:capture --app #{@app_name}") if @capture_fresh
 
           run('rm *.dump*')
 
-          new_dump_name = "#{Time.now.to_i}_#{app_name}.dump"
+          new_dump_name = "#{Time.now.to_i}_#{@app_name}.dump"
 
-          run("heroku pg:backups:download -a #{app_name}")
+          run("heroku pg:backups:download -a #{@app_name}")
 
           run("mv latest.dump #{@dump_dir}/#{new_dump_name}")
         end
@@ -237,10 +221,6 @@ module Sov
           current_version = current_version_s.delete('^0-9')
 
           newest_version == current_version
-        end
-
-        def shopware_dir?
-          run('pwd').split('/').last == Sov::Utils::PROJECT_NAME
         end
 
         def ignoring_dump_dir?

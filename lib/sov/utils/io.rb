@@ -3,17 +3,21 @@
 module Sov
   module Utils
     module IO
-      module ClassMethods
+      module CLASS_METHODS
       end
 
-      module InstanceMethods
+      module INSTANCE_METHODS
         def error_out_with_message(message)
           raise message
         end
 
         def run(command)
-          puts "Running `#{command}`"
+          puts "Running `#{command}`" if @verbose
           `#{command}`.chop
+        end
+
+        def print_update(message)
+          puts message if @verbose
         end
 
         def print(message)

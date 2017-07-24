@@ -6,11 +6,40 @@ require "sov/utils/io"
 require "sov/utils/constants"
 require "sov/utils/db"
 
+options = { task: ARGV[0] }
 
-foray = Sov::Foray.new(
-  # These comments are included to illustrate the options necessary for development
-  # skip_dir_check: true,
-  # custom_dump_dir: '/Users/jwolfe/RubyProjects/shop-ware/.dump_files',
-  # custom_project_dir: '/Users/jwolfe/RubyProjects/shop-ware'
-)
+ARGV.each do |arg|
+  if arg.include?('--custom_dump_dir')
+    options.merge! custom_dump_dir: arg.gsub('--custom_dump_dir=', '')
+  elsif arg.include?('--custom_project_dir')
+    options.merge! custom_project_dir: arg.gsub('--custom_project_dir=', '')
+  elsif arg.include?('--verbose')
+    options.merge! verbose: true
+  elsif arg.include?('--old_branch')
+    options.merge! new_branch: false
+  elsif arg.include?('--new_branch')
+    options.merge! new_branch: true
+  elsif arg.include?('--not_hotfix')
+    options.merge! hotfix: false
+  elsif arg.include?('--hotfix')
+    options.merge! hotfix: true
+  elsif arg.include?('--existing_dump')
+    options.merge! new_dump: false
+  elsif arg.include?('--new_dump')
+    options.merge! new_dump: true
+  elsif arg.include?('--capture_fresh')
+    options.merge! capture_fresh: true
+  elsif arg.include?('--do_not_capture_fresh')
+    options.merge! capture_fresh: false
+  elsif arg.include?('--app_name')
+    options.merge! app_name: arg.gsub('--app_name=', '')
+  elsif arg.include?('--db_name')
+    options.merge! db_name: arg.gsub('--db_name=', '')
+  end
+end
+
+foray = Sov::Foray.new(options)
+
+ARGV.clear
+
 foray.start!
