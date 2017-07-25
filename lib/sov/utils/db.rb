@@ -79,13 +79,13 @@ module Sov
           run('bundle exec rake db:create')
 
           dump_file_path = "#{@dump_dir}/#{@dump_file_name}"
-          run("pg_restore -c --no-owner --no-privileges -d #{@db_name} #{dump_file_path}")
+          system("pg_restore -c --no-owner --no-privileges -d #{@db_name} #{dump_file_path}")
 
           run('bundle exec rake db:migrate')
 
           run('bundle exec rake db:sanitize')
 
-          if run('bundle exec rake -T').include?('db:after_setup')
+          if run('bundle exec rake -T').include?('db:sov_utils:after_setup')
             run('bundle exec rake db:sov_utils:after_setup')
           end
         end
@@ -187,13 +187,13 @@ module Sov
         def download_dump_file
           run("heroku pg:backups:capture --app #{@app_name}") if @capture_fresh
 
-          run('rm *.dump*')
-
           new_dump_name = "#{Time.now.to_i}_#{@app_name}.dump"
 
+          heroku_dump_file_name = 'latest.dump'
+          run('rm latest.dump') if File.exist?(heroku_dump_file_name)
           run("heroku pg:backups:download -a #{@app_name}")
 
-          run("mv latest.dump #{@dump_dir}/#{new_dump_name}")
+          run("mv #{heroku_dump_file_name} #{@dump_dir}/#{new_dump_name}")
         end
 
         # Bool Checkers
