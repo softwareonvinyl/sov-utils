@@ -32,7 +32,7 @@ module Sov
 
           if @dump_avail
             @new_dump = if @new_dump.nil?
-                          ask_yes_no('Would you like to use a previously downloaded dump?')
+                          !ask_yes_no('Would you like to use a previously downloaded dump?')
                         else
                           @new_dump
                         end
@@ -43,7 +43,6 @@ module Sov
           if !@new_dump
             @dump_file_name = latest_dump
           else
-            # download a new dump
             @capture_fresh = if @capture_fresh.nil?
                                ask_yes_no(
                                  'Would you like to capture a fresh backup before '\
