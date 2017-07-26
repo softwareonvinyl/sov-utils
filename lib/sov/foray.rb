@@ -70,10 +70,15 @@ class Sov::Foray
         '--db_name=<value>'
       ]
 
-      message = "Current tasks are 'db_restore' 'help'\n"
+      message = "\nExample command:\n"
+      message += "bundle exec sov-utils db_restore --old_branch --not_hotfix --new_dump "\
+        "--do_not_capture_fresh --app_name=shopware-demo --db_name=shopware_dev\n\n"
+      message += "Current tasks are 'db_restore' and 'help'\n"
+      message += "'db_restore': Fully resets the desired database using a new or existing dump\n"
+      message += "'help': Displays a help menu with configuration options\n\n"
       message += "The configurable options are as such:\n"
       message += options.join(", \n")
-      message += "\n"
+      message += "\n\n"
       message += 'NOTE: Be sure to not add any extra spaces in the variable declarations!'
 
       print(message)
