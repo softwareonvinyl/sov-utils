@@ -3,7 +3,7 @@ module Sov
   module Utils
     VERSION = '0.2.1'
     PACKAGE_NAME = 'sov-utils'
-    PSQL_VERSION = '9.4.12'
+    PSQL_VERSION = '9.6.6'
     BUNDLER_VERSION = '1.15.1'
     PROJECT_NAME = 'sov-utils'
     DUMP_DIR = '.dump_files'
