@@ -18,7 +18,8 @@ class Sov::Foray
     include Sov::Utils::Config::INSTANCE_METHODS
 
     def initialize(options={})
-      @config = Sov::Utils::Config.new
+      set_config
+
       @task = options[:task]
       @dump_dir = options[:custom_dump_dir] || @config['dump_dir'] || Sov::Utils::DUMP_DIR
       @project_dir = options[:custom_project_dir] || '.'
