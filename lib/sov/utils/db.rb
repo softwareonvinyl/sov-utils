@@ -96,7 +96,7 @@ module Sov
             print_update('You are currently using the correct Postgres version.')
           else
             message = "Your current version of Postgresql is unsupported. " +
-              "#{PSQL_VERSION} is the supported version."
+              "#{@config.psql_version} is the supported version."
             error_out_with_message(message)
           end
         end
@@ -115,7 +115,7 @@ module Sov
             print_update('You are currently using the correct Bundler version.')
           else
             message = "Your current version of Bundler is unsupported. " +
-              "#{BUNDLER_VERSION} is the supported version."
+              "#{@config.bundler_version} is the supported version."
             error_out_with_message(message)
           end
         end
@@ -138,7 +138,7 @@ module Sov
             print_update('Your git ignore settings are correct.')
           else
             message = "Your git ignore settings are not correct. " +
-              "Please add #{Sov::Utils::DUMP_DIR} to the git ignore file."
+              "Please add #{@dump_dir} to the git ignore file."
             error_out_with_message(message)
           end
         end
@@ -146,10 +146,10 @@ module Sov
         def ensure_dump_files_count
           dump_count = run("ls #{@dump_dir}").split(/\n/).length
 
-          return false unless dump_count > Sov::Utils::DUMP_MAX_COUNT
+          return false unless dump_count > @config.dump_max_count
 
           print("Your system currently has #{dump_count}. " +
-                  "#{Sov::Utils::DUMP_MAX_COUNT} is the configured max.")
+                  "#{@config.dump_max_count} is the configured max.")
           print('Would you like to:')
           print('1) Do nothing')
           print('2) Clear out the directory')
@@ -202,11 +202,11 @@ module Sov
         end
 
         def pg_supported_version?
-          run('psql --version').include?(Sov::Utils::PSQL_VERSION)
+          run('psql --version').include?(@config.psql_version)
         end
 
         def bundler_supported_version?
-          run('bundle -v').include?(Sov::Utils::BUNDLER_VERSION)
+          run('bundle -v').include?(@config.bundler_version)
         end
 
         def newest_util_version?

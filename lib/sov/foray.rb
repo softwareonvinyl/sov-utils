@@ -1,5 +1,6 @@
 require 'sov/utils/io'
 require 'sov/utils/db'
+require 'sov/utils/config'
 require 'sov/utils/branch_management'
 require 'pry'
 
@@ -13,9 +14,13 @@ class Sov::Foray
     extend Sov::Utils::DB::CLASS_METHODS
     include Sov::Utils::DB::INSTANCE_METHODS
 
+    extend Sov::Utils::Config::CLASS_METHODS
+    include Sov::Utils::Config::INSTANCE_METHODS
+
     def initialize(options={})
+      @config = get_config
       @task = options[:task]
-      @dump_dir = options[:custom_dump_dir] || Sov::Utils::DUMP_DIR
+      @dump_dir = options[:custom_dump_dir] || @config['dump_dir'] || Sov::Utils::DUMP_DIR
       @project_dir = options[:custom_project_dir] || '.'
       @verbose = options[:verbose]
       @new_branch = options[:new_branch]
