@@ -9,7 +9,7 @@ module Sov
       end
 
       module INSTANCE_METHODS
-        def set_config
+        def init_config
           error_out_with_message('Configuration file not present') unless File.exists?('.sov_utils.yml')
           @config = YAML.load_file('.sov_utils.yml')
         end
